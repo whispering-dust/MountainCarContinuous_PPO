@@ -12,24 +12,6 @@ We use PPO with vectorized environments, the basic paper: [Proximal Policy Optim
 **Vectorized Environments** (in our case there are  16 environments) is a method that means that the agent is trained in     
 16 environments simultaneously.
 
-### Training score
-
-![](images/plot_MountainCarCont_16proc_21epis_score152.png)
- 
-
-### MountainCar, different models
-
-* [MountainCar, Q-learning](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master/MountainCar-Q-Learning)
-* [MountainCar, DQN](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master/MountainCar-DQN)
-* [MountainCarContinuous, TD3](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master/MountainCarContinuous-TD3) 
-
-### Other PPO projects
-
-  * [BipedalWalker](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master//BipedalWalker-PPO-VectorizedEnv),   16 parallel agents 
-  * [CarRacing](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master/CarRacing-From-Pixels-PPO),  Single agent, Learning from pixels   
-  * [C r a w l e r  ](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master/Project-2_Continuous-Control-Crawler-PPO), 12 parallel agents   
-  * [Pong](https://github.com/Rafael1s/Deep-Reinforcement-Learning-Algorithms/tree/master/Pong-Policy-Gradient-PPO), 8 parallel agents
-
 ### References
 * [Proximal Policy Optimization](https://openai.com/blog/openai-baselines-ppo/).   
 "_PPO has become the default reinforcement learning algorithm at OpenAI._"   
