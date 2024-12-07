@@ -23,12 +23,14 @@ class ppo_agent():
         self.MSELoss = nn.MSELoss()
 
         self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
+        critic_params = list(self.actor_critic.base.critic.parameters()) + \
+                        list(self.actor_critic.dist.parameters())
+        self.optimizer_critic = optim.Adam(critic_params, lr=lr, eps=eps)
 
     def update(self, rollouts):
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
             advantages.std() + 1e-5)
-
         for e in range(self.ppo_epoch):
 
             data_generator = rollouts.feed_forward_generator(
@@ -56,3 +58,26 @@ class ppo_agent():
                 nn.utils.clip_grad_norm_(self.actor_critic.parameters(), self.max_grad_norm)
                 self.optimizer.step()
 
+    def update_critic_only(self, rollouts):
+        advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
+        advantages = (advantages - advantages.mean()) / (
+            advantages.std() + 1e-5)
+
+        for e in range(self.ppo_epoch):
+            data_generator = rollouts.feed_forward_generator(
+                advantages, self.num_mini_batch)
+            for sample in data_generator:
+                obs_batch, recurrent_hidden_states_batch, actions_batch, \
+                   return_batch, masks_batch, old_action_log_probs_batch, \
+                       adv_targ = sample
+
+                values, _, _, _ = self.actor_critic.evaluate_actions(
+                    obs_batch, recurrent_hidden_states_batch,
+                    masks_batch, actions_batch)
+
+                value_loss = self.MSELoss(values, return_batch)
+
+                self.optimizer_critic.zero_grad()
+                value_loss.mean().backward()
+                nn.utils.clip_grad_norm_(self.optimizer_critic.param_groups[0]['params'], self.max_grad_norm)
+                self.optimizer_critic.step()

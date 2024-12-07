@@ -8,7 +8,7 @@ import gym
 from multiprocessing import Process, Pipe
 from abc import ABC, abstractmethod
 from init_vec_env import VecEnvWrapper
-from continuous_mountain_car import Continuous_MountainCarEnv
+from continuous_mountain_car import Continuous_MountainCarEnv, Continuous_MountainCarEnvDense
 
 from gym.envs.registration import register
 register(
@@ -130,9 +130,11 @@ def worker(remote, parent_remote, env_fn_wrapper):
 
 
 class parallelEnv(VecEnv):
-    def __init__(self, env_name='MountainCarContinuous-v0',n=4, seed=None,spaces=None):
-
-        self.env_fns = [Continuous_MountainCarEnv() for _ in range(n)]
+    def __init__(self, env_name='MountainCarContinuous-v0',n=4, seed=None,spaces=None, dense=False):
+        if dense:
+            self.env_fns = [Continuous_MountainCarEnvDense() for _ in range(n)]
+        else:
+            self.env_fns = [Continuous_MountainCarEnv() for _ in range(n)]
 
         if seed is not None:
             for i,e in enumerate(self.env_fns):
