@@ -78,10 +78,10 @@ class Continuous_MountainCarEnv(gym.Env):
         self.min_action = -1.0
         self.max_action = 1.0
         self.min_position = -9
-        self.max_position = 5.8
+        self.max_position = 6
         self.max_speed = 0.07
         self.goal_position = (
-            5.4  # was 0.5 in gym, 0.45 in Arnaud de Broissia's version
+            5.6  # was 0.5 in gym, 0.45 in Arnaud de Broissia's version
         )
         self.goal_velocity = goal_velocity
         self.power = 0.0015
@@ -108,8 +108,9 @@ class Continuous_MountainCarEnv(gym.Env):
         position = self.state[0]
         velocity = self.state[1]
         force = min(max(action[0], self.min_action), self.max_action)
-
-        velocity += force * self.power - 0.0025 * math.cos(3 * position)
+        slope = self._slope(position)
+        angle = math.atan(slope)
+        velocity += force * self.power - 0.0025 * angle
         if velocity > self.max_speed:
             velocity = self.max_speed
         if velocity < -self.max_speed:
@@ -121,17 +122,27 @@ class Continuous_MountainCarEnv(gym.Env):
             position = self.min_position
         if position == self.min_position and velocity < 0:
             velocity = 0
-
+        
         # Convert a possible numpy bool to a Python bool.
-        done = bool(position >= self.goal_position and velocity >= self.goal_velocity)
+        first_flag_position = -2.1
+        first_target = bool((position >= first_flag_position and velocity >= self.goal_velocity))
+        final_target = bool(position >= self.goal_position and velocity >= self.goal_velocity)
 
         reward = 0
-        if done:
-            reward = 100.0
+        if first_target:
+            reward = 40.0
+
+        if position > first_flag_position:
+            distance_from_goal = self.goal_position - position
+            reward += max(0, 60 - distance_from_goal * 10)
+
+        if final_target:
+            reward = 200.0
+
         reward -= math.pow(action[0], 2) * 0.1
 
         self.state = np.array([position, velocity], dtype=np.float32)
-        return self.state, reward, done, {}
+        return self.state, reward, final_target, {}
 
     def reset(
         self,
@@ -141,21 +152,17 @@ class Continuous_MountainCarEnv(gym.Env):
         options: Optional[dict] = None
     ):
         super().reset(seed=seed)
-        self.state = np.array([self.np_random.uniform(low=-9.4, high=-8.2), 0])
+        self.state = np.array([self.np_random.uniform(low=-6.6, high=-5.6), 0])
         if not return_info:
             return np.array(self.state, dtype=np.float32)
         else:
             return np.array(self.state, dtype=np.float32), {}
 
     def _height(self, xs):
-        beta=0.2
-        max_x=10
-         # 衰减因子
-        decay = 1 - beta * (xs / max_x)
-        decay = np.clip(decay, 0.8, 1.0)  # 防止过度衰减，保持一定下限
+        y = 1.1* np.sin(0.8*xs - 2.8) + 0.16*xs+3
         
         # 修改后的函数
-        return 1.2*(np.sin(1.5 * xs) * (0.6 + 0.3 * (xs / 1.8)) * decay + 0.3 * (xs + 1.2) + 3)
+        return y
     
     def _slope(self, x):
         delta = 0.0001  # 微小变化量

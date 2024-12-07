@@ -2,11 +2,14 @@ import numpy as np
 import scipy.optimize as opt
 
 def height_function(xs):
-    beta = 0.2
-    max_x = 10
-    decay = 1 - beta * (xs / max_x)
-    decay = np.clip(decay, 0.8, 1.0)
-    return np.sin(2.2 * xs) * (0.6 + 0.3 * (xs / 1.8)) * decay + 0.3 * (xs + 1.2) + 2.5
+        beta=0.2
+        max_x=10
+         # 衰减因子
+        decay = 1 - beta * (xs / max_x)
+        decay = np.clip(decay, 0.8, 1.0)  # 防止过度衰减，保持一定下限
+        
+        # 修改后的函数
+        return 1.2*(np.sin(1.5 * xs) * (0.6 + 0.3 * (xs / 1.8)) * decay + 0.3 * (xs + 1.2) + 3)
 
 # 用于寻找极大值的辅助函数
 def find_max(func, lower_bound, upper_bound):

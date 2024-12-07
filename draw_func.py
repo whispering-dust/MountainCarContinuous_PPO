@@ -1,19 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def modified_height(xs, beta=0.1, max_x=10):
-     # 衰减因子
-    decay = 1 - beta * (xs / max_x)
-    decay = np.clip(decay, 0.8, 1.0)  # 防止过度衰减，保持一定下限
-    
-    # 修改后的函数
-    return np.sin(3 * xs)  + 0.3 * (xs ) + 2.5
+def modified_height(xs):
+
+    y = 0.8* np.sin(0.5*xs) + 0.08*xs
+    return y
 
 # 生成数据
-xs = np.linspace(-6, 3.6, 500)
+xs = np.linspace(-9, 6, 500)
 
 # 调用修改后的函数
-ys = modified_height(xs, beta=0.2)
+ys = modified_height(xs)
 
 # 绘制图形
 plt.figure(figsize=(10, 6))
