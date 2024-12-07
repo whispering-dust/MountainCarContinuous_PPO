@@ -7,7 +7,7 @@ def modified_height(xs, beta=0.1, max_x=10):
     decay = np.clip(decay, 0.8, 1.0)  # 防止过度衰减，保持一定下限
     
     # 修改后的函数
-    return np.sin(2.2 * xs) * (0.3 + 0.3 * (xs / 1.8)) * decay + 0.3 * (xs + 1.2) + 2.5
+    return np.sin(3 * xs)  + 0.3 * (xs ) + 2.5
 
 # 生成数据
 xs = np.linspace(-6, 3.6, 500)

@@ -77,11 +77,11 @@ class Continuous_MountainCarEnv(gym.Env):
     def __init__(self, goal_velocity=0):
         self.min_action = -1.0
         self.max_action = 1.0
-        self.min_position = -6
-        self.max_position = 3.8
+        self.min_position = -9
+        self.max_position = 5.8
         self.max_speed = 0.07
         self.goal_position = (
-            3.6  # was 0.5 in gym, 0.45 in Arnaud de Broissia's version
+            5.4  # was 0.5 in gym, 0.45 in Arnaud de Broissia's version
         )
         self.goal_velocity = goal_velocity
         self.power = 0.0015
@@ -141,7 +141,7 @@ class Continuous_MountainCarEnv(gym.Env):
         options: Optional[dict] = None
     ):
         super().reset(seed=seed)
-        self.state = np.array([self.np_random.uniform(low=-5.4, high=-4.2), 0])
+        self.state = np.array([self.np_random.uniform(low=-9.4, high=-8.2), 0])
         if not return_info:
             return np.array(self.state, dtype=np.float32)
         else:
@@ -155,11 +155,15 @@ class Continuous_MountainCarEnv(gym.Env):
         decay = np.clip(decay, 0.8, 1.0)  # 防止过度衰减，保持一定下限
         
         # 修改后的函数
-        return np.sin(2.2 * xs) * (0.6 + 0.3 * (xs / 1.8)) * decay + 0.3 * (xs + 1.2) + 2.5
+        return 1.2*(np.sin(1.5 * xs) * (0.6 + 0.3 * (xs / 1.8)) * decay + 0.3 * (xs + 1.2) + 3)
+    
+    def _slope(self, x):
+        delta = 0.0001  # 微小变化量
+        return (self._height(x + delta) - self._height(x - delta)) / (2 * delta)
     
     def render(self, mode="human"):
         screen_width = 1000
-        screen_height = 800
+        screen_height = 600
 
         world_width = self.max_position - self.min_position
         scale = screen_width / world_width
@@ -180,11 +184,12 @@ class Continuous_MountainCarEnv(gym.Env):
         pygame.draw.aalines(self.surf, points=xys, closed=False, color=(0, 0, 0))
 
         clearance = 10
-
+        slope = self._slope(pos)
+        angle = math.atan(slope)
         l, r, t, b = -carwidth / 2, carwidth / 2, carheight, 0
         coords = []
         for c in [(l, b), (l, t), (r, t), (r, b)]:
-            c = pygame.math.Vector2(c).rotate_rad(math.cos(3 * pos))
+            c = pygame.math.Vector2(c).rotate_rad(angle)
             coords.append(
                 (
                     c[0] + (pos - self.min_position) * scale,
@@ -194,9 +199,8 @@ class Continuous_MountainCarEnv(gym.Env):
 
         gfxdraw.aapolygon(self.surf, coords, (0, 0, 0))
         gfxdraw.filled_polygon(self.surf, coords, (0, 0, 0))
-
         for c in [(carwidth / 4, 0), (-carwidth / 4, 0)]:
-            c = pygame.math.Vector2(c).rotate_rad(math.cos(3 * pos))
+            c = pygame.math.Vector2(c).rotate_rad(angle)
             wheel = (
                 int(c[0] + (pos - self.min_position) * scale),
                 int(c[1] + clearance + self._height(pos) * scale),
