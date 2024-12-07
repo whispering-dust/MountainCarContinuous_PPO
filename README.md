@@ -61,4 +61,3 @@ Environment solved with Average Score:  152.7411231610043
 "_Vectorized Environments are a method for stacking multiple independent environments into a single environment. 
 Instead of training an RL agent on 1 environment per step, it allows us to train it on n environments per step._"
 
-# MountainCarContinuous_PPO
