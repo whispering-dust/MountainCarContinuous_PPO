@@ -24,8 +24,11 @@ class ppo_agent():
 
         self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
         critic_params = list(self.actor_critic.base.critic.parameters()) + \
-                        list(self.actor_critic.dist.parameters())
+                        list(self.actor_critic.base.critic_linear.parameters())
         self.optimizer_critic = optim.Adam(critic_params, lr=lr, eps=eps)
+        self.actor_params = list(self.actor_critic.base.actor.parameters()) + \
+                        list(self.actor_critic.dist.parameters())
+        self.optimizer_actor = optim.Adam(self.actor_params, lr=lr, eps=eps)
 
     def update(self, rollouts):
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
@@ -81,3 +84,15 @@ class ppo_agent():
                 value_loss.mean().backward()
                 nn.utils.clip_grad_norm_(self.optimizer_critic.param_groups[0]['params'], self.max_grad_norm)
                 self.optimizer_critic.step()
+
+    def update_actor_only(self, states, actions):
+        values, action_log_probs, dist_entropy, states = self.actor_critic.evaluate_actions(
+            states, None, None, actions)  # (batch_size, 2) (batch_size, 1)
+
+        self.optimizer_actor.zero_grad()
+        loss = -action_log_probs
+        loss.mean().backward()
+
+        nn.utils.clip_grad_norm_(self.optimizer_actor.param_groups[0]['params'], self.max_grad_norm)
+        self.optimizer_actor.step()
+
