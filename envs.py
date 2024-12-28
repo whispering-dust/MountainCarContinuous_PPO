@@ -6,7 +6,7 @@ from gym.spaces.box import Box
 from init_vec_env import VecEnvWrapper
 from dummy_vec_env import DummyVecEnv
 from subproc_vec_env import SubprocVecEnv
-from continuous_mountain_car import Continuous_MountainCarEnv
+from continuous_mountain_car import Continuous_MountainCarEnv, Continuous_MountainCarEnvSpecial
 
 class AddTimestep(gym.ObservationWrapper):
     def __init__(self, env=None):
